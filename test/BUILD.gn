@@ -643,6 +643,7 @@ test("brave_browser_tests") {
     sources += [
       "//brave/browser/speedreader/speedreader_browsertest.cc",
     ]
+  }
 
   if (enable_brave_playlists) {
      sources += [
