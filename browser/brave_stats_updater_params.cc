@@ -12,11 +12,13 @@
 #include "base/time/time.h"
 #include "brave/browser/brave_stats_updater_util.h"
 #include "brave/common/pref_names.h"
+#include "chrome/browser/first_run/first_run.h"
 #include "components/prefs/pref_service.h"
 
 namespace brave {
 
 base::Time BraveStatsUpdaterParams::g_current_time;
+bool BraveStatsUpdaterParams::g_first_run;
 
 BraveStatsUpdaterParams::BraveStatsUpdaterParams(PrefService* pref_service)
     : BraveStatsUpdaterParams(pref_service,
@@ -58,6 +60,12 @@ std::string BraveStatsUpdaterParams::GetWeekOfInstallationParam() const {
   return week_of_installation_;
 }
 
+std::string BraveStatsUpdaterParams::GetDateOfInstallationParam() const {
+  return date_of_installation_.is_null()
+      ? "null"
+      : brave::GetDateAsYMD(date_of_installation_);
+}
+
 std::string BraveStatsUpdaterParams::GetReferralCodeParam() const {
   return referral_promo_code_.empty() ? "none" : referral_promo_code_;
 }
@@ -70,6 +78,16 @@ void BraveStatsUpdaterParams::LoadPrefs() {
   week_of_installation_ = pref_service_->GetString(kWeekOfInstallation);
   if (week_of_installation_.empty())
     week_of_installation_ = GetLastMondayAsYMD();
+  date_of_installation_ = pref_service_->GetTime(kDateOfInstallation);
+  if (date_of_installation_.is_null() && GetFirstRun()) {
+    // We need to save the time here to handle the edge case when the referral
+    // ping is unsuccessful, and IsChromeFirstRun() will never be set again.
+    date_of_installation_ = GetCurrentTimeNow();
+    pref_service_->SetTime(kDateOfInstallation, date_of_installation_);
+  } else if (!date_of_installation_.is_null() &&
+        (GetCurrentTimeNow() - date_of_installation_ >= g_dtoi_delete_delta)) {
+      date_of_installation_ = base::Time();
+  }
 #if BUILDFLAG(ENABLE_BRAVE_REFERRALS)
   referral_promo_code_ = pref_service_->GetString(kReferralPromoCode);
 #endif
@@ -81,6 +99,7 @@ void BraveStatsUpdaterParams::SavePrefs() {
   pref_service_->SetInteger(kLastCheckMonth, month_);
   pref_service_->SetBoolean(kFirstCheckMade, true);
   pref_service_->SetString(kWeekOfInstallation, week_of_installation_);
+  pref_service_->SetTime(kDateOfInstallation, date_of_installation_);
 }
 
 std::string BraveStatsUpdaterParams::BooleanToString(bool bool_value) const {
@@ -120,9 +139,19 @@ base::Time BraveStatsUpdaterParams::GetCurrentTimeNow() const {
 }
 
 // static
+bool BraveStatsUpdaterParams::GetFirstRun() const {
+  return g_first_run || first_run::IsChromeFirstRun();
+}
+
+// static
 void BraveStatsUpdaterParams::SetCurrentTimeForTest(
     const base::Time& current_time) {
   g_current_time = current_time;
+}
+
+// static
+void BraveStatsUpdaterParams::SetFirstRunForTest(bool first_run) {
+  g_first_run = first_run;
 }
 
 }  // namespace brave

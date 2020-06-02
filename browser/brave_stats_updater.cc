@@ -57,6 +57,8 @@ GURL GetUpdateURL(const GURL& base_update_url,
   update_url = net::AppendQueryParameter(
       update_url, "woi", stats_updater_params.GetWeekOfInstallationParam());
   update_url = net::AppendQueryParameter(
+      update_url, "dtoi", stats_updater_params.GetDateOfInstallationParam());
+  update_url = net::AppendQueryParameter(
       update_url, "ref", stats_updater_params.GetReferralCodeParam());
   return update_url;
 }
@@ -224,6 +226,7 @@ void RegisterPrefsForBraveStatsUpdater(PrefRegistrySimple* registry) {
   registry->RegisterIntegerPref(kLastCheckMonth, 0);
   registry->RegisterStringPref(kLastCheckYMD, std::string());
   registry->RegisterStringPref(kWeekOfInstallation, std::string());
+  registry->RegisterTimePref(kDateOfInstallation, base::Time());
 }
 
 }  // namespace brave
