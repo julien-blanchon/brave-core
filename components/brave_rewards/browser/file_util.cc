@@ -5,6 +5,8 @@
 
 #include "brave/components/brave_rewards/browser/file_util.h"
 
+#include <stdint.h>
+
 #include <memory>
 
 #include "base/logging.h"
@@ -17,7 +19,7 @@ const int64_t kChunkSize = 1024;
 
 int64_t SeekNumLines(
     base::File* file,
-    const uint64_t num_lines) {
+    const int num_lines) {
   DCHECK(file);
 
   if (num_lines == 0) {
@@ -33,7 +35,7 @@ int64_t SeekNumLines(
     return 0;
   }
 
-  uint64_t line_count = 0;
+  int line_count = 0;
 
   char chunk[kChunkSize];
   int64_t chunk_size = kChunkSize;
@@ -136,7 +138,7 @@ bool TruncateFileFromEnd(
 
 bool TailFile(
     base::File* file,
-    const uint64_t num_lines) {
+    const int num_lines) {
   DCHECK(file);
 
   const int64_t offset = SeekNumLines(file, num_lines);
@@ -149,14 +151,14 @@ bool TailFile(
 
 bool TailFileAsString(
     base::File* file,
-    const uint64_t num_lines,
+    const int num_lines,
     std::string* value) {
   DCHECK(file);
   DCHECK(value);
 
   int64_t offset;
 
-  if (num_lines == 0) {
+  if (num_lines == -1) {
     offset = file->GetLength();
   } else {
     offset = SeekNumLines(file, num_lines);

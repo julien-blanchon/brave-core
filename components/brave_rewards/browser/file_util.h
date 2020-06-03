@@ -6,8 +6,6 @@
 #ifndef BRAVE_COMPONENTS_BRAVE_REWARDS_BROWSER_FILE_UTIL_H_
 #define BRAVE_COMPONENTS_BRAVE_REWARDS_BROWSER_FILE_UTIL_H_
 
-#include <stdint.h>
-
 #include <string>
 
 #include "base/files/file.h"
@@ -16,11 +14,11 @@ namespace brave_rewards {
 
 bool TailFile(
     base::File* file,
-    const uint64_t num_lines);
+    const int num_lines);
 
 bool TailFileAsString(
     base::File* file,
-    const uint64_t num_lines,
+    const int num_lines,
     std::string* value);
 
 std::string GetLastFileError(

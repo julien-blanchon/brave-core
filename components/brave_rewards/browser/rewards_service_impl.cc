@@ -230,7 +230,7 @@ std::string LoadDiagnosticLogOnFileTaskRunner(
   std::string value;
   if (!TailFileAsString(&g_diagnostic_log, num_lines, &value)) {
     value = base::StringPrintf("ERROR: %s",
-        GetLastFileError(&g_diagnostic_log));
+        GetLastFileError(&g_diagnostic_log).c_str());
   }
 
   return value;
