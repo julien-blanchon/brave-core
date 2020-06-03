@@ -225,12 +225,12 @@ bool ResetOnFilesTaskRunner(const std::vector<base::FilePath>& paths) {
   return res;
 }
 
-std::string LoadDiagnosticLogOnFileTaskRunner(const base::FilePath& path) {
+std::string LoadDiagnosticLogOnFileTaskRunner(
+    const int num_lines) {
   std::string value;
-  const bool success = base::ReadFileToString(path, &value);
-
-  if (!success) {
-    return "";
+  if (!TailFileAsString(&g_diagnostic_log, num_lines, &value)) {
+    value = base::StringPrintf("ERROR: %s",
+        GetLastFileError(&g_diagnostic_log));
   }
 
   return value;
@@ -2376,9 +2376,11 @@ void RewardsServiceImpl::OnWriteToLogOnFileTaskRunner(
   DCHECK(success);
 }
 
-void RewardsServiceImpl::LoadDiagnosticLog(LoadDiagnosticLogCallback callback) {
+void RewardsServiceImpl::LoadDiagnosticLog(
+      const int num_lines,
+      LoadDiagnosticLogCallback callback) {
   base::PostTaskAndReplyWithResult(file_task_runner_.get(), FROM_HERE,
-      base::BindOnce(&LoadDiagnosticLogOnFileTaskRunner, diagnostic_log_path_),
+      base::BindOnce(&LoadDiagnosticLogOnFileTaskRunner, num_lines),
       base::BindOnce(&RewardsServiceImpl::OnLoadDiagnosticLogOnFileTaskRunner,
           AsWeakPtr(),
           std::move(callback)));

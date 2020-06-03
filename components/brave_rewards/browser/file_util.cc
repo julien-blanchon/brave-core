@@ -74,10 +74,12 @@ int64_t SeekNumLines(
   return length;
 }
 
-bool TruncateFileFromEnd(
+bool TruncateFileFromEndAsString(
     base::File* file,
-    const int64_t offset) {
+    const int64_t offset,
+    std::string* value) {
   DCHECK(file);
+  DCHECK(value);
 
   if (offset < 0) {
     return false;
@@ -98,11 +100,28 @@ bool TruncateFileFromEnd(
     return false;
   }
 
+  *value = std::string(buffer.get());
+
+  return true;
+}
+
+bool TruncateFileFromEnd(
+    base::File* file,
+    const int64_t offset) {
+  DCHECK(file);
+
+  std::string value;
+  if (!TruncateFileFromEndAsString(file, offset, &value)) {
+    return false;
+  }
+
   if (file->Seek(base::File::FROM_BEGIN, 0) == -1) {
     return false;
   }
 
-  if (file->WriteAtCurrentPos(buffer.get(), size) == -1) {
+  const int64_t size = value.size();
+
+  if (file->WriteAtCurrentPos(value.c_str(), size) == -1) {
     return false;
   }
 
@@ -126,6 +145,32 @@ bool TailFile(
   }
 
   return TruncateFileFromEnd(file, offset);
+}
+
+bool TailFileAsString(
+    base::File* file,
+    const uint64_t num_lines,
+    std::string* value) {
+  DCHECK(file);
+  DCHECK(value);
+
+  int64_t offset;
+
+  if (num_lines == 0) {
+    offset = file->GetLength();
+  } else {
+    offset = SeekNumLines(file, num_lines);
+  }
+
+  if (offset == -1) {
+    return false;
+  }
+
+  if (!TruncateFileFromEndAsString(file, offset, value)) {
+    return false;
+  }
+
+  return true;
 }
 
 std::string GetLastFileError(

@@ -336,9 +336,12 @@ class RewardsService : public KeyedService {
       const int verbose_level,
       const std::string& message) = 0;
 
-  virtual void LoadDiagnosticLog(LoadDiagnosticLogCallback callback) = 0;
+  virtual void LoadDiagnosticLog(
+      const int num_lines,
+      LoadDiagnosticLogCallback callback) = 0;
 
-  virtual void ClearDiagnosticLog(ClearDiagnosticLogCallback callback) = 0;
+  virtual void ClearDiagnosticLog(
+      ClearDiagnosticLogCallback callback) = 0;
 
  protected:
   base::ObserverList<RewardsServiceObserver> observers_;

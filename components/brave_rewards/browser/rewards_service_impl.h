@@ -531,7 +531,9 @@ class RewardsServiceImpl : public RewardsService,
   void OnWriteToLogOnFileTaskRunner(
     const bool success);
 
-  void LoadDiagnosticLog(LoadDiagnosticLogCallback callback) override;
+  void LoadDiagnosticLog(
+      const int num_lines,
+      LoadDiagnosticLogCallback callback) override;
 
   void OnLoadDiagnosticLogOnFileTaskRunner(
       LoadDiagnosticLogCallback callback,

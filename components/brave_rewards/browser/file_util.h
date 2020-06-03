@@ -18,6 +18,11 @@ bool TailFile(
     base::File* file,
     const uint64_t num_lines);
 
+bool TailFileAsString(
+    base::File* file,
+    const uint64_t num_lines,
+    std::string* value);
+
 std::string GetLastFileError(
     base::File* file);
 

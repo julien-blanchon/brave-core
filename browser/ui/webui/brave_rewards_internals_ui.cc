@@ -243,7 +243,7 @@ void RewardsInternalsDOMHandler::GetLog(const base::ListValue *args) {
     return;
   }
 
-  rewards_service_->LoadDiagnosticLog(
+  rewards_service_->LoadDiagnosticLog(1000,
       base::BindOnce(
           &RewardsInternalsDOMHandler::OnGetLog,
           weak_ptr_factory_.GetWeakPtr()));
